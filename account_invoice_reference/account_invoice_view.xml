@@ -6,9 +6,6 @@
       <field name="model">account.invoice</field>
       <field name="inherit_id" ref="account.invoice_supplier_form"/>
       <field name="arch" type="xml">
-        <field name="supplier_invoice_number" position="attributes">
-          <attribute name="required">1</attribute>
-        </field>
         <!-- remove the name to move it in a better place -->
         <xpath expr="/form/sheet/notebook/page[@string='Other Info']//field[@name='name']"
           position="replace">
