@@ -92,3 +92,35 @@ class AccountInvoice(models.Model):
             return True
         else:
             return super(AccountInvoice, self).write(vals)
+
+    @api.multi
+    def finalize_invoice_move_lines(self, move_lines):
+        """
+        Sets name on total lines to invoice name.
+
+        In the base class (in `action_move_create()`), the move line name for
+        each total line is set to `supplier_invoice_number` if it exists. As we
+        already use that for the reference, the base class behavior is
+        redudant.
+        """
+        self.ensure_one()
+
+        # Base class does what we want if either name or supplier invoice
+        # number is missing.
+        if not (self.name and self.supplier_invoice_number):
+            return move_lines
+
+        # Move line name is truncated in `line_get_convert()`.
+        def truncate(value):
+            return value[:64]
+
+        # Find total lines by seeing if the name has been set to the supplier
+        # invoice number. This is kind of a hack, but I can't think of a better
+        # way.
+        trunc_ref = truncate(self.supplier_invoice_number)
+
+        for (x, y, line) in move_lines:
+            if line.get('name') == trunc_ref:
+                line['name'] = truncate(self.name)
+
+        return move_lines
